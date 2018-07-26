@@ -1,0 +1,277 @@
+TITLE by YOUR_NAME_HERE
+========================================================
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+# 加载你最终使用的所有组件
+# 在这个代码块的分析中。
+
+# 注意，在这个代码块中，将参数 "echo" 设为假。
+# This prevents the code from displaying in the knitted HTML output.这可以避免代码混入 HTML 输出显示。
+# 应当在文件中，对所有代码块设为 echo=FALSE 。
+
+install.packages('ggcorrplot')
+library(ggplot2)
+library(ggcorrplot)
+
+```
+
+```{r echo=FALSE, Load_the_Data}
+# 加载数据
+setwd('C:/Users/shire/Downloads/udacity/Advanced/project/R project')
+loans<-read.csv('prosperLoanData.csv')
+
+```
+
+
+# 单变量绘图选择
+```{r echo=FALSE, Univariate_Plots}
+df_loans<-loans[,c('LoanOriginationDate','LoanStatus','ProsperRating..Alpha.','EmploymentStatus','BorrowerState','IncomeRange','Term','BorrowerAPR','ProsperScore','ListingCategory..numeric.','CurrentDelinquencies','AmountDelinquent','DelinquenciesLast7Years','AvailableBankcardCredit','TotalTrades','DebtToIncomeRatio','LoanOriginalAmount')]
+str(df_loans)
+summary(df_loans)
+table(df_loans$Term)
+
+```
+
+```{r echo=FALSE, Univariate_Plots}
+ggplot(data=df_loans,aes(x=BorrowerAPR))+
+  geom_histogram(fill = "lightblue",colour = "black",binwidth=0.01)
+```
+###BorrowerAPR主要范围大致在为0.07至0.38之间，分布近似正态分布。
+```{r echo=FALSE, Univariate_Plots}
+df_loans <- within(df_loans,
+                   LoanStatus <- factor(LoanStatus, levels=names(sort(table(LoanStatus),                                                         decreasing=TRUE))))
+ggplot(data=df_loans,aes(x=LoanStatus))+
+  geom_bar(fill = "lightblue",colour = "black")
+```
+###从贷款状态来看，最多的是current，其次是completed,然后是Chargedoff。
+```{r echo=FALSE, Univariate_Plots}
+ggplot(data=df_loans,aes(x=ProsperRating..Alpha.))+
+  geom_bar(fill = "lightblue",colour = "black")
+```
+###从ProsperRating (Alpha)的有效数据来看，最多的是C，其次是B,然后是AA,最少的是AA。
+```{r echo=FALSE, Univariate_Plots}
+ggplot(data=df_loans,aes(x=ProsperScore))+
+  geom_bar(fill = "lightblue",colour = "black")
+```
+###从ProsperScore来看，分布集中在3~9分。
+```{r echo=FALSE, Univariate_Plots}
+labels<-c('Not Available','Debt Consolidation','Home Improvement','Business','Personal Loan','Student Use','Auto','Other','Baby&Adoption','Boat','Cosmetic Procedure','Engagement Ring','Green Loans','Household Expenses','Large Purchases','Medical/Dental','Motorcycle','Taxes','RV','Vacation','Wedding Loans')
+
+df_loans$ListingCategory<-factor(df_loans$ListingCategory..numeric.,labels = labels)
+ggplot(data=df_loans,aes(x=ListingCategory))+
+  geom_bar(fill = "lightblue",colour = "black")
+```
+###由于ListingCategory是用数字来体现的，难以直观看出贷款用途分类，将ListingCategory转为文字分类之后作图，可以看出，贷款最多用于Debt Consolidation，其次是Home Improvement，然后是Other。
+```{r echo=FALSE, Univariate_Plots}
+df_loans<-within(df_loans,BorrowerState<-factor(BorrowerState,levels = names(sort(table(BorrowerState),decreasing = TRUE))))
+ggplot(data=df_loans,aes(x=BorrowerState))+
+  geom_bar(fill = "lightblue",colour = "black")
+```
+###贷款次数最多的州是CA,其次是TX，然后是出于差不多水平的NY和FL；贷款频率最低的3个州分别是WY,ME和ND。
+```{r echo=FALSE, Univariate_Plots}
+ggplot(data=subset(df_loans,CurrentDelinquencies>0),aes(x=CurrentDelinquencies))+
+  geom_histogram(fill = "lightblue",colour = "black",binwidth = 1)
+```
+###CurrentDelinquencies随着次数增加，频率逐渐降低。
+```{r echo=FALSE, Univariate_Plots}
+
+ggplot(data=subset(df_loans,CurrentDelinquencies>0),aes(x=AmountDelinquent))+
+  xlim(0,quantile(df_loans$AmountDelinquent,0.99,na.rm=TRUE))+
+  geom_histogram(fill = "lightblue",colour = "black",binwidth=500)
+```
+###由于AmountDelinquent有离群值，对直方图分布有较大影响，所以将x轴上限设置为AmountDelinquent的0.99分位来排除离群值。从图形可以看出，AmountDelinquent的频率随着数量增加而降低，0~500这个区间出现次数最多。
+```{r echo=FALSE, Univariate_Plots}
+ggplot(data=df_loans,aes(x=DelinquenciesLast7Years))+
+    xlim(0,quantile(df_loans$DelinquenciesLast7Years,0.99,na.rm=TRUE))+
+  geom_histogram(fill = "lightblue",colour = "black",binwidth = 1)
+```
+###将x轴上限设置为DelinquenciesLast7Years的0.99分位之后，可以发现，总体上，DelinquenciesLast7Years随着次数增加，频率逐渐降低。
+
+```{r echo=FALSE, Univariate_Plots}
+ggplot(data=df_loans,aes(x=AvailableBankcardCredit))+
+  xlim(0,quantile(df_loans$AvailableBankcardCredit,0.99,na.rm=TRUE))+
+  geom_histogram(fill = "lightblue",colour = "black",binwidth = 1000)
+df_loans$log_AvailableBankcardCredit<-log(df_loans$AvailableBankcardCredit)
+ggplot(data=df_loans,aes(x=log_AvailableBankcardCredit))+
+  geom_histogram(fill = "lightblue",colour = "black")
+
+```
+###将x轴上限设置为AvailableBankcardCredit的0.99分位之后，可以看出，AvailableBankcardCredits随着数额的增加，频率逐渐降低。另一方面，将AvailableBankcardCredit做log处理后，图形分布较之前偏正态一些。
+```{r echo=FALSE, Univariate_Plots}
+ggplot(data=df_loans,aes(x=EmploymentStatus))+
+  geom_bar(fill = "lightblue",colour = "black")
+```
+###在EmploymentStatus中，状态为employed是贷款次数最多的。
+```{r echo=FALSE, Univariate_Plots}
+ggplot(data=df_loans,aes(x=TotalTrades))+
+  xlim(0,quantile(df_loans$TotalTrades,0.999,na.rm=TRUE))+
+  geom_histogram(fill = "lightblue",colour = "black"，binwidth=1)
+```
+###从TotalTrades来看，图形成右偏态分布，高峰集中在20附近。
+```{r echo=FALSE, Univariate_Plots}
+ggplot(data=df_loans,aes(x=DebtToIncomeRatio))+
+  xlim(0,quantile(df_loans$DebtToIncomeRatio,0.99,na.rm=TRUE))+
+  geom_histogram(fill = "lightblue",colour = "black",binwidth = 0.02)
+```
+###将x轴上限设置为DebtToIncomeRatio的0.99分位之后，图形呈现右偏态分布，高峰集中在0.16附近。
+
+
+```{r echo=FALSE, Univariate_Plots}
+ggplot(data=df_loans,aes(x=IncomeRange))+
+  geom_bar(stat="count",fill = "lightblue",colour = "black")
+```
+###收入居中的贷款次数较多。
+
+```{r echo=FALSE, Univariate_Plots}
+ggplot(data=df_loans,aes(x=LoanOriginalAmount))+
+  xlim(0,quantile(df_loans$LoanOriginalAmount,0.99,na.rm=TRUE))+
+  geom_histogram(fill = "lightblue",colour = "black",binwidth = 500)
+```
+###LoanOriginalAmount的分布似乎没有什么规律，且有些区间分布明显高于其他区间。
+
+# 单变量分析
+
+### 你的数据集结构是什么？
+数据集共有113937个观察值，81个变量，从中选取了16个变量进行探索。
+
+### 你的数据集内感兴趣的主要特性有哪些？
+贷款额度和贷款次数，哪些变量会影响是否成功贷款或者贷款额度。
+
+### 你认为数据集内哪些其他特征可以帮助你探索兴趣特点？
+收入，雇佣状态、银行信用额度等应该会对贷款额度有所影响。
+
+### 根据数据集内已有变量，你是否创建了任何新变量？
+
+### 在已经探究的特性中，是否存在任何异常分布？你是否对数据进行一些操作，如清洁、调整或改变数据的形式？如果是，你为什么会这样做？
+AvailableBankcardCredit分布呈右偏态分布，所以将AvailableBankcardCredit做log处理后，让图形分布较之前偏正态一些。
+对TotalTrades，AmountDelinquent等含有离群值的数据，在绘图是采用x轴0.99分位的方法将离群值排除。
+
+# 双变量绘图选择
+
+```{r echo=FALSE, Bivariate_Plots}
+ggplot(data=df_loans,aes(x=ListingCategory,y=LoanOriginalAmount))+
+  geom_boxplot()
+
+```
+###在ListingCategory中，中位数与其他相比较高的是Debt Consolidation和Baby&Adoption，这看起来是合理的，鉴于这两项确实是需要相对较高的开支。
+
+```{r echo=FALSE, Bivariate_Plots}
+ggplot(data=df_loans,aes(x=log_AvailableBankcardCredit,y=LoanOriginalAmount))+
+  xlim(0,quantile(df_loans$log_AvailableBankcardCredit,na.rm=TRUE,0.99))+
+  geom_point(alpha=0.05,position='jitter')
+
+```
+###log_AvailableBankcardCredit较低的区域，相对贷款数量少，且贷款额度低，而贷款额度最高的分布则比较集中在log_AvailableBankcardCredit高的区域。
+```{r echo=FALSE, Bivariate_Plots}
+df_loans$Term_by_year<-cut(df_loans$Term,breaks=c(0,12,36,60),labels=c('1year','3year','5year'))
+ggplot(data=df_loans,aes(x=Term_by_year,y=LoanOriginalAmount))+
+  geom_boxplot()+
+  stat_summary(fun.y = mean,geom = 'point', shape = 4)
+```
+###三年期的贷款中位数略高于一年期，5年期的中位数明显高于1年期和3年期，3年期的最高额与5年期基本持平，同时两者都明显高于1年期的最高额,从贷款数额的均值来看，5年期均值>3年期均值>1年期均值。
+```{r echo=FALSE, Bivariate_Plots}
+ggplot(data=df_loans,aes(x=EmploymentStatus,y=LoanOriginalAmount))+
+  geom_boxplot()
+```
+###从EmploymentStatus来看，Employed的LoanOriginalAmount相对于其他状态中位数较高，最高额的相对较高。
+```{r echo=FALSE, Bivariate_Plots}
+
+df_loans$ListingCreationDate<-as.Date(df_loans$LoanOriginationDate,"%Y-%m-%d")
+df_loans$year_month<-format(df_loans$ListingCreationDate,"%Y-%m")
+ggplot(data=df_loans,aes(x=year_month,y=LoanOriginalAmount))+
+  geom_point(stat='summary',fun.y=mean)
+  
+```
+###从2005年到2014年，LoanOriginalAmount均值逐渐成上升趋势，但在中间经历过一段下跌，之后又恢复持续上升的趋势。
+```{r echo=FALSE, Bivariate_Plots}
+ggplot(data=df_loans,aes(x=CurrentDelinquencies,y=LoanOriginalAmount))+
+  geom_point(position='jitter',alpha=0.1)
+```
+###
+```{r echo=FALSE, Bivariate_Plots}
+
+ggplot(data=df_loans,aes(x=IncomeRange,y=LoanOriginalAmount))+
+  geom_boxplot()+
+  stat_summary(fun.y = mean,geom = 'point', shape = 4)
+```
+###除去IncomeRange为0的部分，IncomeRange较高的范围对应LoanOriginalAmount的均值及中位数也相对较高；
+###IncomeRange为$100,000+的LoanOriginalAmount的最高值高于其他，其余的IncomeRange相应的LoanOriginalAmount的最高值基本相同。
+
+```{r echo=FALSE, Bivariate_Plots}
+ggplot(data=df_loans,aes(x=DebtToIncomeRatio,y=LoanOriginalAmount))+
+  geom_point(position='jitter'，alpha=0.05)
+```
+
+```{r echo=FALSE, Bivariate_Plots}
+
+```
+
+
+```{r echo=FALSE, Bivariate_Plots}
+
+```
+
+
+```{r echo=FALSE, Bivariate_Plots}
+
+```
+
+
+```{r echo=FALSE, Bivariate_Plots}
+
+```
+# 双变量分析
+
+### 探讨你在这部分探究中观察到的一些关系。这些感兴趣的特性与数据集内其他特性有什么区别？
+
+### 你是否观察到主要特性与其他特性之间的有趣关系？
+
+### 你发现最强的关系是什么？
+
+
+
+
+# 多变量绘图选择
+
+```{r echo=FALSE, Multivariate_Plots}
+
+```
+
+# 多变量分析
+
+###  探讨你在这部分探究中观察到的一些关系。通过观察感兴趣的特性，是否存在相互促进的特性？
+
+### 这些特性之间是否存在有趣或惊人的联系呢？
+
+### 选项：你是否创建过数据集的任何模型？讨论你模型的优缺点。
+
+------
+
+# 定稿图与总结
+
+### 绘图一
+```{r echo=FALSE, Plot_One}
+
+```
+
+### 描述一
+
+
+### 绘图二
+```{r echo=FALSE, Plot_Two}
+
+```
+
+### 描述二
+
+
+### 绘图三
+```{r echo=FALSE, Plot_Three}
+
+```
+
+### 描述三
+
+------
+
+# 反思
