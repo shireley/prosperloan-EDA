@@ -22,7 +22,12 @@ loans<-read.csv('prosperLoanData.csv')
 
 ## 单变量绘图选择
 ```{r echo=FALSE, message=FALSE, warning=FALSE,Univariate_Plots}
-df_loans<-loans[,c('LoanOriginationDate','LoanStatus','EmploymentStatus','BorrowerState','IncomeRange','Term','ProsperRating..numeric.','BorrowerAPR','ProsperScore','ListingCategory..numeric.','CurrentDelinquencies','AmountDelinquent','AvailableBankcardCredit','TotalTrades','DebtToIncomeRatio','LoanOriginalAmount')]
+df_loans<-loans[,c('LoanOriginationDate','LoanStatus','EmploymentStatus',
+                   'BorrowerState','IncomeRange','Term',
+                   'ProsperRating..numeric.','BorrowerAPR','ProsperScore',
+                   'ListingCategory..numeric.','CurrentDelinquencies',
+                   'AmountDelinquent','AvailableBankcardCredit','TotalTrades',
+                   'DebtToIncomeRatio','LoanOriginalAmount')]
 str(df_loans)
 summary(df_loans)
 table(df_loans$Term)
@@ -55,7 +60,8 @@ BorrowerAPR主要范围大致在为0.07至0.38之间，分布近似正态分布�
 df_loans <- within(df_loans,
                    LoanStatus <- factor(LoanStatus, 
                                         levels=names(sort(table(LoanStatus),                                                         decreasing=TRUE))))
-create_barplot('LoanStatus')
+create_barplot('LoanStatus')+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```  
 
 从贷款状态来看，最多的是current，其次是completed,然后是Chargedoff。
@@ -158,7 +164,8 @@ create_histogram('DebtToIncomeRatio',0.02)+
 
 ####IncomeRange_distribution
 ```{r echo=FALSE,message=FALSE, warning=FALSE,IncomeRange_distribution}
-create_barplot('IncomeRange')
+create_barplot('IncomeRange')+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```  
 
 贷款人群中，收入居中的最多。
@@ -318,7 +325,8 @@ ListingCategory，Term对OriginalAmount的影响最大。
 ####LoanOriginalAmount by Time&IncomeRange
 ```{r echo=FALSE, Multivariate_Plots}
 ggplot(data=df_loans,aes(x=year_month,y=LoanOriginalAmount,color=IncomeRange))+
-  geom_point(stat='summary',fun.y = mean)
+  geom_point(stat='summary',fun.y = mean)+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```  
 
 不同IncomeRange所处的LoanOriginalAmount范围虽然不同，但是趋势大致相同，除了$1-24,999范围在最后阶段处于下降趋势阶段，与其他范围趋势不同。
@@ -344,10 +352,16 @@ ggplot(data=df_loans,aes(x=ProsperRating..numeric.,y=LoanOriginalAmount,
 
 ####LoanOriginalAmount_Line_Chart by ProsperRating&DebtToIncomeRatio
 ```{r echo=FALSE,LoanOriginalAmount_Line_Chart_by_ProsperRating&DebtToIncomeRatio}
-ggplot(data=df_loans,aes(x=DebtToIncomeRatio,y=LoanOriginalAmount,
-                         color=ProsperRating..numeric.))+
+df_loans$ProsperRating<-factor(df_loans$ProsperRating..numeric.,
+                               levels = c(1,2,3,4,5,6,7))
+
+ggplot(data=subset(df_loans,!is.na(DebtToIncomeRatio)&!is.na(ProsperRating)),
+       (aes(x=DebtToIncomeRatio,y=LoanOriginalAmount,
+                         color=ProsperRating)))+
   xlim(0,2.5)+
-  geom_point()
+  geom_point()+
+  scale_color_brewer('ProsperRating',direction = -1)+
+  theme_dark()
 ```  
   
 在DebtToIncomeRatio相对集中的区域，即0~2.5的区域中，若DebtToIncomeRatio相同时，ProsperRating低的LoanOriginalAmount也低。
@@ -405,6 +419,7 @@ ggplot(data=df_loans,aes(x=ProsperRating..numeric.,y=LoanOriginalAmount,
 ```{r echo=FALSE, Plot_Three}
 ggplot(data=df_loans,aes(x=year_month,y=LoanOriginalAmount,color=IncomeRange))+
   geom_point(stat='summary',fun.y = mean)+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
   ggtitle('LoanOriginalAmount by Time&IncomeRange')
 ```
 
