@@ -9,6 +9,6 @@ ProsperÊÇÃÀ¹úµÄÒ»¼ÒP2PÏû·Ñ´û¿î¹«Ë¾£¬ÏîÄ¿Ê¹ÓÃRÓïÑÔ£¬Í¨¹ý¶ÔprosperLoan2005-2014Äêµ
 1.´ÓÔ­Ê¼Êý¾ÝprosperLoanData.csvÖÐÌáÈ¡Ïà¹Ø±äÁ¿×é³ÉÊý¾Ý¼¯¡£  
 2.Ñ¡ÔñÊý¾Ý½øÐÐÍ³¼Æ·ÖÎöºÍµ¥±äÁ¿»æÍ¼·ÖÎö¡£  
 3.Ñ¡ÔñÊý¾Ý½øÐÐË«±äÁ¿»æÍ¼·ÖÎö£¬Ö÷ÒªÌ½Ë÷¸÷Êý¾ÝÓëLoanOriginalAmountÖ®¼äµÄ¹ØÏµ¡£  
-4.Ñ¡ÔñÊý¾Ý½øÐÐ¶à±äÁ¿»æÍ¼·ÖÎöºÍ»Ø¹é·ÖÎö¡£
+4.Ñ¡ÔñÊý¾Ý½øÐÐ¶à±äÁ¿»æÍ¼·ÖÎöºÍ»Ø¹é·ÖÎö¡£  
 5.¶¨¸åºÍ·´Ë¼¡£  
 ÏîÄ¿´úÂë±£´æÔÚprosperloan_EDA.RMDÖÐ£¬·ÖÎö¼°»æÍ¼±£´æÔÚprosperloan_EDA.htmlÖÐ¡£
